@@ -107,7 +107,14 @@ class Robot:
 
         direction = random.choice([True, False])
 
+        attempts = 0
+
         while True:
+
+            attempts += 1
+            if attempts > 30:
+                direction = not direction
+                attempts = 0
 
             distance = self.maqueen.read_distance()
 
