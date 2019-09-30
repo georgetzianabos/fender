@@ -8,7 +8,7 @@
 
 The LED color indicates how far an obstacle is
 
-## install
+## Install
 
 You either copy and paste the fender.py code into an [online editor](https://python.microbit.org/v/1.1) or use [uflash](https://github.com/ntoll/uflash) after cloning the repo. The following command should work:
 
