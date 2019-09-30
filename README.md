@@ -6,7 +6,11 @@
 * **Confused face** looking for a new position
 * **Sad face** exception occured
 
-The LED color indicates how far an obstacle is
+The LED color indicates how far an obstacle is:
+
+* **Red** obstacle close will need to look for a new direction
+* **Orange** approaching an obstacle
+* **Green** all good carry on
 
 ## Install
 
