@@ -17,11 +17,10 @@ STATE_MOVING = 0
 STATE_FIND_CLEARING = 1
 
 
-class Robot:
+class Maqueen:
 
     def __init__(self):
 
-        self.state = STATE_FIND_CLEARING
         self.np = neopixel.NeoPixel(pin15, 4)
 
     def read_distance(self):
@@ -77,20 +76,28 @@ class Robot:
         except OSError:
             display.show(Image.SAD)
 
+
+class Robot:
+
+    def __init__(self):
+
+        self.state = STATE_FIND_CLEARING
+        self.maqueen = Maqueen()
+
     def moving(self):
 
         display.show(Image.HAPPY)
 
         while True:
 
-            distance = self.read_distance()
+            distance = self.maqueen.read_distance()
 
             if distance < 35 and distance is not 0:
                 self.state = STATE_FIND_CLEARING
                 break
 
-            self.motor_run(LEFT_MOTOR, FORWARDS, 100)
-            self.motor_run(RIGHT_MOTOR, FORWARDS, 100)
+            self.maqueen.motor_run(LEFT_MOTOR, FORWARDS, 100)
+            self.maqueen.motor_run(RIGHT_MOTOR, FORWARDS, 100)
 
             sleep(100)
 
@@ -102,18 +109,18 @@ class Robot:
 
         while True:
 
-            distance = self.read_distance()
+            distance = self.maqueen.read_distance()
 
             if distance > 50 and distance is not 0:
                 self.state = STATE_MOVING
                 break
 
             if direction:
-                self.motor_run(LEFT_MOTOR, FORWARDS, 50)
-                self.motor_run(RIGHT_MOTOR, BACKWARDS, 50)
+                self.maqueen.motor_run(LEFT_MOTOR, FORWARDS, 50)
+                self.maqueen.motor_run(RIGHT_MOTOR, BACKWARDS, 50)
             else:
-                self.motor_run(LEFT_MOTOR, BACKWARDS, 50)
-                self.motor_run(RIGHT_MOTOR, FORWARDS, 50)
+                self.maqueen.motor_run(LEFT_MOTOR, BACKWARDS, 50)
+                self.maqueen.motor_run(RIGHT_MOTOR, FORWARDS, 50)
 
             sleep(100)
 
