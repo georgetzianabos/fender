@@ -1,5 +1,5 @@
 from microbit import (  # pylint: disable=import-error
-    display, sleep, i2c, Image, pin1, pin2, pin15
+    display, sleep, i2c, Image, pin1, pin2, pin15, accelerometer
 )
 import machine  # pylint: disable=import-error
 import utime  # pylint: disable=import-error
@@ -12,9 +12,6 @@ RIGHT_MOTOR = 0x02
 
 FORWARDS = 0x00
 BACKWARDS = 0x01
-
-STATE_MOVING = 0
-STATE_FIND_CLEARING = 1
 
 
 class Maqueen:
@@ -77,6 +74,11 @@ class Maqueen:
             display.show(Image.SAD)
 
 
+STATE_MOVING = 0
+STATE_FIND_CLEARING = 1
+STATE_REVERSE = 2
+
+
 class Robot:
 
     def __init__(self):
@@ -84,22 +86,44 @@ class Robot:
         self.state = STATE_FIND_CLEARING
         self.maqueen = Maqueen()
 
+    def upright_check(self):
+
+        upright = False
+
+        for _ in range(3):
+
+            reading = accelerometer.get_y()
+
+            upright = reading > 800
+
+            if upright:
+                break
+
+            self.maqueen.motor_stop(LEFT_MOTOR)
+            self.maqueen.motor_stop(RIGHT_MOTOR)
+
+            sleep(100)
+
+        if not upright:
+            self.state = STATE_REVERSE
+
     def moving(self):
 
         display.show(Image.HAPPY)
 
-        while True:
+        while self.state == STATE_MOVING:
 
             distance = self.maqueen.read_distance()
-
-            if distance < 35 and distance is not 0:
-                self.state = STATE_FIND_CLEARING
-                break
 
             self.maqueen.motor_run(LEFT_MOTOR, FORWARDS, 100)
             self.maqueen.motor_run(RIGHT_MOTOR, FORWARDS, 100)
 
             sleep(100)
+
+            if distance < 35 and distance is not 0:
+                self.state = STATE_FIND_CLEARING
+
+            self.upright_check()
 
     def find_clearing(self):
 
@@ -109,7 +133,7 @@ class Robot:
 
         attempts = 0
 
-        while True:
+        while self.state == STATE_FIND_CLEARING:
 
             attempts += 1
             if attempts > 30:
@@ -117,10 +141,6 @@ class Robot:
                 attempts = 0
 
             distance = self.maqueen.read_distance()
-
-            if distance > 50 and distance is not 0:
-                self.state = STATE_MOVING
-                break
 
             if direction:
                 self.maqueen.motor_run(LEFT_MOTOR, FORWARDS, 50)
@@ -131,9 +151,31 @@ class Robot:
 
             sleep(100)
 
+            if distance > 50 and distance is not 0:
+                self.state = STATE_MOVING
+
+            self.upright_check()
+
+    def reverse(self):
+
+        self.maqueen.motor_run(LEFT_MOTOR, BACKWARDS, 100)
+        self.maqueen.motor_run(RIGHT_MOTOR, BACKWARDS, 100)
+
+        sleep(2000)
+
+        self.maqueen.motor_run(LEFT_MOTOR, BACKWARDS, 50)
+        self.maqueen.motor_run(RIGHT_MOTOR, FORWARDS, 50)
+
+        sleep(1000)
+
+        self.state = STATE_FIND_CLEARING
+
     def run(self):
 
         while True:
+
+            if self.state == STATE_REVERSE:
+                self.reverse()
 
             if self.state == STATE_MOVING:
                 self.moving()
