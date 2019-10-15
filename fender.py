@@ -149,7 +149,9 @@ class Robot:
                 self.maqueen.motor_run(LEFT_MOTOR, BACKWARDS, 50)
                 self.maqueen.motor_run(RIGHT_MOTOR, FORWARDS, 50)
 
-            sleep(100)
+            sleep_for = 200 if attempts > 60 else 100
+
+            sleep(sleep_for)
 
             if distance > 50 and distance is not 0:
                 self.state = STATE_MOVING
